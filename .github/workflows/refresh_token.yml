@@ -1,0 +1,28 @@
+name: Refresh EO Pages Token
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'   # 每2小时运行一次
+  workflow_dispatch:          # 支持手动触发
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate redirect page
+        env:
+          EO_API_TOKEN: ${{ secrets.EO_API_TOKEN }}
+          EO_DOMAIN: cn-sunisalex-pages.zh-cn.edgeone.cool
+          OUTPUT_FILE: index.html
+        run: python3 generate_redirect.py
+
+      - name: Commit and push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "chore: refresh eo token $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
