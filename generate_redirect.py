@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """
 获取 EO Pages 预览 token，生成 redirect.html
-由 GitHub Actions 每2小时调用一次
+由 GitHub Actions 每1小时调用一次
 """
 
 import http.client
 import json
 import ssl
 import os
-import urllib.parse
 from datetime import datetime
 
 EO_API_TOKEN = os.environ["EO_API_TOKEN"]
@@ -35,18 +34,18 @@ def fetch_token():
     if data.get("Code") != 0:
         raise RuntimeError(f"API 错误: {data}")
 
-    token     = data["Data"]["Response"]["Token"]
-    timestamp = data["Data"]["Response"]["Timestamp"]
-    return f"https://{EO_DOMAIN}?eo_token={token}&eo_time={timestamp}"
+    return {
+        "token":     data["Data"]["Response"]["Token"],
+        "timestamp": str(data["Data"]["Response"]["Timestamp"]),
+    }
 
 
-def generate_html(url: str) -> str:
+def generate_html(token: str, timestamp: str) -> str:
     now = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
     return f"""<!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0;url={url}">
   <title>跳转中...</title>
   <style>
     body {{ font-family: sans-serif; display: flex; align-items: center;
@@ -58,19 +57,34 @@ def generate_html(url: str) -> str:
 <body>
   <div class="box">
     <p>正在跳转，请稍候...</p>
-    <p><a href="{url}">点击这里手动跳转</a></p>
+    <p><a id="link" href="#">点击这里手动跳转</a></p>
     <p style="font-size:12px;color:#aaa">Token 更新于 {now}</p>
   </div>
+  <script>
+    const eoDomain  = "https://{EO_DOMAIN}";
+    const eoToken   = "{token}";
+    const eoTime    = "{timestamp}";
+
+    // 透传用户访问的路径和查询参数
+    const path      = window.location.pathname;
+    const search    = window.location.search;
+    const separator = search ? "&" : "?";
+    const target    = eoDomain + path + search + separator
+                      + "eo_token=" + eoToken + "&eo_time=" + eoTime;
+
+    document.getElementById("link").href = target;
+    window.location.replace(target);
+  </script>
 </body>
 </html>"""
 
 
 if __name__ == "__main__":
     print(f"正在获取 token: {EO_DOMAIN}")
-    url = fetch_token()
-    print(f"预览 URL: {url}")
+    data = fetch_token()
+    print(f"Token: {data['token']}, Timestamp: {data['timestamp']}")
 
-    html = generate_html(url)
+    html = generate_html(data["token"], data["timestamp"])
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"已写入 {OUTPUT_FILE}")
