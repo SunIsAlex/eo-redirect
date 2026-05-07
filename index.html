@@ -2,7 +2,6 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0;url=https://cn-sunisalex-pages.zh-cn.edgeone.cool?eo_token=09bde7bd51dca1575548913e36c20172&eo_time=1778149311">
   <title>跳转中...</title>
   <style>
     body { font-family: sans-serif; display: flex; align-items: center;
@@ -14,8 +13,23 @@
 <body>
   <div class="box">
     <p>正在跳转，请稍候...</p>
-    <p><a href="https://cn-sunisalex-pages.zh-cn.edgeone.cool?eo_token=09bde7bd51dca1575548913e36c20172&eo_time=1778149311">点击这里手动跳转</a></p>
-    <p style="font-size:12px;color:#aaa">Token 更新于 2026-05-07 10:21 UTC</p>
+    <p><a id="link" href="#">点击这里手动跳转</a></p>
+    <p style="font-size:12px;color:#aaa">Token 更新于 2026-05-07 10:40 UTC</p>
   </div>
+  <script>
+    const eoDomain  = "https://cn-sunisalex-pages.zh-cn.edgeone.cool";
+    const eoToken   = "dd135e2d72b389f79a0e9b7d32da4ca9";
+    const eoTime    = "1778150419";
+
+    // 透传用户访问的路径和查询参数
+    const path      = window.location.pathname;
+    const search    = window.location.search;
+    const separator = search ? "&" : "?";
+    const target    = eoDomain + path + search + separator
+                      + "eo_token=" + eoToken + "&eo_time=" + eoTime;
+
+    document.getElementById("link").href = target;
+    window.location.replace(target);
+  </script>
 </body>
 </html>
