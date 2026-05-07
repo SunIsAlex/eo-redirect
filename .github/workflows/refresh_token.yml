@@ -2,7 +2,7 @@ name: Refresh EO Pages Token
 
 on:
   schedule:
-    - cron: '0 */2 * * *'   # 每2小时运行一次
+    - cron: '0 * * * *'   # 每1小时运行一次
   workflow_dispatch:          # 支持手动触发
 
 jobs:
